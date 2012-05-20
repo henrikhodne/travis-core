@@ -49,5 +49,17 @@ describe Travis::Github::Payload::Push do
         :compare_url => 'https://github.com/svenfuchs/gem-release/compare/af674bd...9854592'
       }
     end
+
+    it 'returns the last commit that isn\'t skipped' do
+      payload = Travis::Github::Payload.for('push', GITHUB_PAYLOADS['skip-last'])
+
+      payload.commit[:commit].should == '586374eac43853e5542a2e2faafd48047127e4be'
+    end
+
+    it 'returns a skipped commit if it\'s the only commit' do
+      payload = Travis::Github::Payload.for('push', GITHUB_PAYLOADS['skip-one'])
+
+      payload.commit[:commit].should == '46ebe012ef3c0be5542a2e2faafd48047127e4be'
+    end
   end
 end

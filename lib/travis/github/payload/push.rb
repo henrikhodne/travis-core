@@ -41,8 +41,16 @@ module Travis
         end
 
         def commit
-          @commit ||= if commit = gh['commits'].last
-            {
+          unless defined?(@commit)
+            if gh['commits'].length == 1
+              commit = gh['commits'].first
+            else
+              commit = gh['commits'].reverse.find do |commit|
+                !(commit['message'].to_s =~ /\[ci(?: |:)([\w ]*)\]/i && $1.downcase == 'skip')
+              end
+              return nil unless commit
+            end
+            @commit = {
               :commit          => commit['sha'],
               :message         => commit['message'],
               :branch          => gh['ref'].split('/').last,
@@ -55,6 +63,8 @@ module Travis
               :compare_url     => gh['compare']
             }
           end
+
+          @commit
         end
       end
     end
